@@ -43,8 +43,8 @@ A modern, full-stack music streaming web app that streams **any song in the worl
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/YOUR_USERNAME/soniq-music.git
-cd soniq-music
+git clone https://github.com/AshishCodes-dev/sonix-music-app.git
+cd sonix-music-app
 ```
 
 ### 2. Install dependencies
@@ -57,18 +57,15 @@ Create a `.env` file in the root (see `.env.example`):
 ```env
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+YOUTUBE_API_KEY=your_youtube_data_api_key
 ```
 
 ### 4. Run the dev server
 ```bash
-npm run dev
+vercel dev
 ```
-Open `http://localhost:5173` 🎉
-
-### 5. Add your YouTube API Key
-- Go to **Settings** in the app
-- Paste a free **YouTube Data API v3** key ([get one here](https://console.cloud.google.com/))
-- Start streaming!
+Open the local URL shown in the terminal 🎉
 
 ---
 
@@ -87,12 +84,10 @@ npm run preview
 ---
 
 ## 👨‍💻 Author
-Built with ❤️ by **[Your Name]**
-
-- Portfolio: [your-portfolio.com](https://your-portfolio.com)
-- GitHub: [@YourUsername](https://github.com/YourUsername)
+Built with ❤️ by **Ashish**
+- GitHub: [@AshishCodes-dev](https://github.com/AshishCodes-dev)
 
 ---
 
 ## 📄 License
-MIT © [Your Name]
+MIT
