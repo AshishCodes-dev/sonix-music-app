@@ -1,5 +1,5 @@
-import supabase from './db-client.js';
-import { audioFor } from './audio-map.js';
+import supabase from './_db-client.js';
+import { audioFor } from './_audio-map.js';
 import { applyCors, rateLimit } from './_security.js';
 
 // Lightweight AI-style recommender: based on user's most-played genre/mood

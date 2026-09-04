@@ -1,4 +1,4 @@
-import supabase from './db-client.js';
+import supabase from './_db-client.js';
 import { applyCors, rateLimit } from './_security.js';
 
 export default async function handler(req, res) {

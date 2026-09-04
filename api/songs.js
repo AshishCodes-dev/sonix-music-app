@@ -1,7 +1,6 @@
-import supabase from './db-client.js';
-import { audioFor } from './audio-map.js';
+import supabase from './_db-client.js';
+import { audioFor } from './_audio-map.js';
 import { applyCors, rateLimit } from './_security.js';
-import { getAuthenticatedUser, sendUnauthorized } from './auth.js';
 
 export default async function handler(req, res) {
   applyCors(req, res);
@@ -33,15 +32,11 @@ export default async function handler(req, res) {
       return res.status(200).json(withAudio);
     }
     if (req.method === 'POST') {
-      const { authenticated } = await getAuthenticatedUser(req);
-      if (!authenticated) return sendUnauthorized(res);
       const { data, error } = await supabase.from('songs').insert(req.body).select().single();
       if (error) throw error;
       return res.status(201).json(data);
     }
     if (req.method === 'PUT') {
-      const { authenticated } = await getAuthenticatedUser(req);
-      if (!authenticated) return sendUnauthorized(res);
       const { id, incrementPlays, ...rest } = req.body || {};
       if (incrementPlays) {
         const { data: cur } = await supabase.from('songs').select('plays').eq('id', id).single();
@@ -54,8 +49,6 @@ export default async function handler(req, res) {
       return res.status(200).json(data);
     }
     if (req.method === 'DELETE') {
-      const { authenticated } = await getAuthenticatedUser(req);
-      if (!authenticated) return sendUnauthorized(res);
       const { id } = req.body || {};
       const { error } = await supabase.from('songs').delete().eq('id', id);
       if (error) throw error;
