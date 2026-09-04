@@ -2,12 +2,8 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
-import { handleGoogleRedirect } from './lib/googleAuth'
 
-handleGoogleRedirect();
 
-// Register the service worker for PWA install. Force-update so users always get
-// the newest build (no stale cache).
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then((reg) => {

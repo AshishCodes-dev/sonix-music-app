@@ -5,7 +5,6 @@ import { Search, ChevronLeft, ChevronRight, User, LogOut, Crown, Mic, Clock, Tre
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getSongs } from '../lib/api';
-import { searchYouTubeSongs, hasApiKey } from '../lib/youtube';
 import type { Song } from '../types';
 import { usePlayer } from '../contexts/PlayerContext';
 
@@ -37,13 +36,7 @@ export default function TopBar() {
     clearTimeout(timer.current);
     timer.current = setTimeout(() => {
       const query = q.trim();
-      if (hasApiKey()) {
-        searchYouTubeSongs(query, 6).then(setResults).catch(() => {
-          getSongs(`search=${encodeURIComponent(query)}&limit=5`).then(setResults).catch(() => {});
-        });
-      } else {
-        getSongs(`search=${encodeURIComponent(query)}&limit=5`).then(setResults).catch(() => {});
-      }
+      getSongs(`search=${encodeURIComponent(query)}&limit=6`).then(setResults).catch(() => setResults([]));
     }, 280);
   }, [q]);
 
