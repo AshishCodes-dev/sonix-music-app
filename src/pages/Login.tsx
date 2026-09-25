@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, Disc3, ArrowRight, User, Sparkles, AlertCircle, CheckCircle2, Globe } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Mail, Lock, Eye, EyeOff, Disc3, ArrowRight, User, Sparkles, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' }) {
@@ -15,13 +15,12 @@ export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' })
 
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
-  const [showGoogleFallback, setShowGoogleFallback] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { user, signInWithGoogle, signInGoogleFallback, signInWithEmail, signUpWithEmail, signInDemo } = useAuth();
+  const { user, signInWithGoogle, signInWithEmail, signUpWithEmail, signInDemo } = useAuth();
 
   useEffect(() => {
     if (user) {
@@ -33,7 +32,6 @@ export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' })
     e.preventDefault();
     setError('');
     setInfo('');
-    setShowGoogleFallback(false);
     setLoading(true);
 
     try {
@@ -62,6 +60,8 @@ export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' })
         setError('Password should be at least 6 characters long.');
       } else if (code === 'auth/invalid-email') {
         setError('Please enter a valid email address.');
+      } else if (code === 'auth/operation-not-allowed') {
+        setError('Email/Password login is not enabled in Firebase Console. Please enable it in Firebase Console.');
       } else if (code === 'auth/too-many-requests') {
         setError('Too many failed attempts. Please try again shortly or use Demo login.');
       } else if (msg) {
@@ -77,7 +77,6 @@ export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' })
   const handleGoogleSignIn = async () => {
     setError('');
     setInfo('');
-    setShowGoogleFallback(false);
     setGoogleLoading(true);
 
     try {
@@ -93,31 +92,15 @@ export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' })
         setError('Google sign-in popup was closed before completing.');
       } else if (code === 'auth/popup-blocked') {
         setError('Popup was blocked by your browser. Please allow popups for this site.');
-      } else if (code === 'auth/unauthorized-domain' || code === 'auth/operation-not-allowed') {
-        setShowGoogleFallback(true);
-        setError('Firebase domain authorization pending. Use Instant Google Login below!');
+      } else if (code === 'auth/unauthorized-domain') {
+        setError('Domain not authorized in Firebase! Please add this domain to Firebase Console -> Authentication -> Settings -> Authorized Domains.');
+      } else if (code === 'auth/operation-not-allowed') {
+        setError('Google Sign-in is not enabled in Firebase Console. Please enable it under Sign-in Providers.');
       } else if (msg) {
         setError(msg);
       } else {
-        setError('Google sign-in could not be completed. Please try again or use Demo login.');
+        setError('Google sign-in could not be completed. Please try again.');
       }
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
-
-  const handleInstantGoogleFallback = async () => {
-    setGoogleLoading(true);
-    setError('');
-    try {
-      const emailGuess = email.trim() || 'google.listener@gmail.com';
-      const nameGuess = name.trim() || 'Google Listener';
-      await signInGoogleFallback(emailGuess, nameGuess);
-      setInfo('Logged in as Google User! Redirecting…');
-      setTimeout(() => navigate('/'), 200);
-    } catch (err) {
-      console.error(err);
-      setError('Could not connect with Google fallback. Try Demo access.');
     } finally {
       setGoogleLoading(false);
     }
@@ -126,7 +109,6 @@ export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' })
   const handleDemoSignIn = async () => {
     setError('');
     setInfo('');
-    setShowGoogleFallback(false);
     setDemoLoading(true);
 
     try {
@@ -197,26 +179,6 @@ export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' })
             >
               <AlertCircle size={16} className="shrink-0" />
               <span>{error}</span>
-            </motion.div>
-          )}
-
-          {showGoogleFallback && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="mb-4 p-3.5 rounded-2xl glass border border-amber-500/30 bg-amber-500/10 text-center"
-            >
-              <p className="text-xs text-amber-200 mb-2.5 flex items-center justify-center gap-1.5 font-medium">
-                <Globe size={14} className="text-amber-400" />
-                Firebase domain authorization is pending in console.
-              </p>
-              <button
-                type="button"
-                onClick={handleInstantGoogleFallback}
-                className="w-full py-2.5 px-4 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 font-semibold text-xs flex items-center justify-center gap-2 transition border border-amber-500/40"
-              >
-                <CheckCircle2 size={15} /> Instant Continue as Google User
-              </button>
             </motion.div>
           )}
 
@@ -336,7 +298,6 @@ export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' })
                 setIsSignup(!isSignup);
                 setError('');
                 setInfo('');
-                setShowGoogleFallback(false);
               }}
               className="font-semibold hover:underline"
               style={{ color: '#06B6D4' }}
