@@ -1,24 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Check } from 'lucide-react';
-import supabase from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { isVoiceDjOn, setVoiceDj } from '../lib/voiceDj';
 
 export default function Settings() {
-  const { user } = useAuth();
-  const [name, setName] = useState(user?.user_metadata?.full_name || '');
+  const { user, updateUserProfile } = useAuth();
+  const [name, setName] = useState(user?.displayName || user?.user_metadata?.full_name || '');
   const [saved, setSaved] = useState(false);
   const [quality, setQuality] = useState('High');
   const [crossfade, setCrossfade] = useState(true);
   const [voiceDj, setVoiceDjState] = useState(isVoiceDjOn());
 
-  const save = async () => { try { await supabase.auth.updateUser({ data: { full_name: name } }); } catch {} setSaved(true); setTimeout(() => setSaved(false), 2000); };
+  useEffect(() => {
+    if (user) {
+      setName(user.displayName || user.user_metadata?.full_name || '');
+    }
+  }, [user]);
+
+  const save = async () => {
+    try {
+      await updateUserProfile(name);
+    } catch (err) {
+      console.error('Error updating profile:', err);
+    }
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
 
   return (
     <div className="px-4 md:px-6 py-6 max-w-2xl">
       <h1 className="font-display text-3xl font-bold mb-6">Settings</h1>
 
-      {/* Streaming status — no setup needed */}
+      {/* Streaming status */}
       <div className="rounded-2xl p-4 mb-4 flex items-center gap-2 text-sm" style={{ background: 'rgba(52,211,153,0.12)', color: '#34d399' }}>
         <Check size={17} /> Streaming is active — search and play any song instantly.
       </div>
@@ -27,10 +40,22 @@ export default function Settings() {
         <div className="glass rounded-2xl p-6 mb-4">
           <h2 className="font-display text-xl font-bold mb-4">Account</h2>
           <label className="text-xs mb-1 block" style={{ color: 'var(--text-dim)' }}>Display Name</label>
-          <input value={name} onChange={e => setName(e.target.value)} className="w-full glass rounded-xl px-4 py-2.5 mb-3 outline-none" style={{ color: 'var(--text)' }} />
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your Name"
+            className="w-full glass rounded-xl px-4 py-2.5 mb-3 outline-none focus:glow-purple transition"
+            style={{ color: 'var(--text)' }}
+          />
           <label className="text-xs mb-1 block" style={{ color: 'var(--text-dim)' }}>Email</label>
-          <input disabled value={user?.email || ''} className="w-full glass rounded-xl px-4 py-2.5 outline-none opacity-60" />
-          <button onClick={save} className="btn-glow text-white px-6 py-2.5 rounded-xl mt-4 text-sm">{saved ? '✓ Saved' : 'Save Changes'}</button>
+          <input
+            disabled
+            value={user?.email || 'Demo User'}
+            className="w-full glass rounded-xl px-4 py-2.5 outline-none opacity-60"
+          />
+          <button onClick={save} className="btn-glow text-white px-6 py-2.5 rounded-xl mt-4 text-sm font-medium">
+            {saved ? '✓ Saved' : 'Save Changes'}
+          </button>
         </div>
       ) : (
         <div className="glass rounded-2xl p-6 mb-4 flex items-center justify-between">

@@ -1,12 +1,13 @@
-import supabase from './supabase';
+import { auth, googleProvider, signInWithPopup } from './firebase';
 
 export async function signInWithGoogle() {
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: window.location.origin,
-      queryParams: { prompt: 'select_account' },
-    },
-  });
-  if (error) console.error('[google-auth] signInWithOAuth failed:', error.message);
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    return { data: result.user, error: null };
+  } catch (error) {
+    console.error('[google-auth] Firebase signInWithPopup failed:', error);
+    return { data: null, error };
+  }
 }
+
+export default signInWithGoogle;
