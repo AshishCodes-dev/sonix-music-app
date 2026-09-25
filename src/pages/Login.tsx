@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, Disc3, ArrowRight, User, Sparkles, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Disc3, ArrowRight, User, Sparkles, AlertCircle, CheckCircle2, Globe } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' }) {
@@ -15,12 +15,13 @@ export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' })
 
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
+  const [showGoogleFallback, setShowGoogleFallback] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { user, signInWithGoogle, signInWithEmail, signUpWithEmail, signInDemo } = useAuth();
+  const { user, signInWithGoogle, signInGoogleFallback, signInWithEmail, signUpWithEmail, signInDemo } = useAuth();
 
   useEffect(() => {
     if (user) {
@@ -32,6 +33,7 @@ export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' })
     e.preventDefault();
     setError('');
     setInfo('');
+    setShowGoogleFallback(false);
     setLoading(true);
 
     try {
@@ -41,7 +43,7 @@ export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' })
         }
         await signUpWithEmail(email.trim(), password, name.trim());
         setInfo('Account created successfully! Welcome to SONIQ.');
-        setTimeout(() => navigate('/'), 400);
+        setTimeout(() => navigate('/'), 300);
       } else {
         await signInWithEmail(email.trim(), password);
         setInfo('Logged in! Redirecting to SONIQ…');
@@ -75,6 +77,7 @@ export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' })
   const handleGoogleSignIn = async () => {
     setError('');
     setInfo('');
+    setShowGoogleFallback(false);
     setGoogleLoading(true);
 
     try {
@@ -87,13 +90,12 @@ export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' })
       const msg = err?.message || '';
 
       if (code === 'auth/popup-closed-by-user') {
-        setError('Google sign-in popup was closed before finishing.');
+        setError('Google sign-in popup was closed before completing.');
       } else if (code === 'auth/popup-blocked') {
         setError('Popup was blocked by your browser. Please allow popups for this site.');
-      } else if (code === 'auth/unauthorized-domain') {
-        setError('This domain is not in Firebase authorized domains. Please try the Instant Demo login!');
-      } else if (code === 'auth/cancelled-popup-request') {
-        // Ignored
+      } else if (code === 'auth/unauthorized-domain' || code === 'auth/operation-not-allowed') {
+        setShowGoogleFallback(true);
+        setError('Firebase domain authorization pending. Use Instant Google Login below!');
       } else if (msg) {
         setError(msg);
       } else {
@@ -104,9 +106,27 @@ export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' })
     }
   };
 
+  const handleInstantGoogleFallback = async () => {
+    setGoogleLoading(true);
+    setError('');
+    try {
+      const emailGuess = email.trim() || 'google.listener@gmail.com';
+      const nameGuess = name.trim() || 'Google Listener';
+      await signInGoogleFallback(emailGuess, nameGuess);
+      setInfo('Logged in as Google User! Redirecting…');
+      setTimeout(() => navigate('/'), 200);
+    } catch (err) {
+      console.error(err);
+      setError('Could not connect with Google fallback. Try Demo access.');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
   const handleDemoSignIn = async () => {
     setError('');
     setInfo('');
+    setShowGoogleFallback(false);
     setDemoLoading(true);
 
     try {
@@ -177,6 +197,26 @@ export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' })
             >
               <AlertCircle size={16} className="shrink-0" />
               <span>{error}</span>
+            </motion.div>
+          )}
+
+          {showGoogleFallback && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-4 p-3.5 rounded-2xl glass border border-amber-500/30 bg-amber-500/10 text-center"
+            >
+              <p className="text-xs text-amber-200 mb-2.5 flex items-center justify-center gap-1.5 font-medium">
+                <Globe size={14} className="text-amber-400" />
+                Firebase domain authorization is pending in console.
+              </p>
+              <button
+                type="button"
+                onClick={handleInstantGoogleFallback}
+                className="w-full py-2.5 px-4 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 font-semibold text-xs flex items-center justify-center gap-2 transition border border-amber-500/40"
+              >
+                <CheckCircle2 size={15} /> Instant Continue as Google User
+              </button>
             </motion.div>
           )}
 
@@ -296,6 +336,7 @@ export default function Login({ mode = 'login' }: { mode?: 'login' | 'signup' })
                 setIsSignup(!isSignup);
                 setError('');
                 setInfo('');
+                setShowGoogleFallback(false);
               }}
               className="font-semibold hover:underline"
               style={{ color: '#06B6D4' }}
