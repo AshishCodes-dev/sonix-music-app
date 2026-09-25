@@ -13,12 +13,13 @@ import {
 } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || import.meta.env.VITE_FIREBASE_APIKEY || 'AIzaSyDY-dz_jDaj9mv1-aKkvoQ5jEF6vTir1dc',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'interviewiq-8511b.firebaseapp.com',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'interviewiq-8511b',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'interviewiq-8511b.firebasestorage.app',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '205125272945',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:205125272945:web:60de85ff1af43bd4dc62d0',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || import.meta.env.VITE_FIREBASE_APIKEY || 'AIzaSyAKYvpM7eM07_zfYFhZc2oRP1yfmndIMwY',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'soniq-music-app-af972.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'soniq-music-app-af972',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'soniq-music-app-af972.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '775001513498',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:775001513498:web:73cd61853165f3013efba3',
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-F4XHXTNCXB',
 };
 
 // Initialize Firebase safely (avoid re-initialization in HMR)
